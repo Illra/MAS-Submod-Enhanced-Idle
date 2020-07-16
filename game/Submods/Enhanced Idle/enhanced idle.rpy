@@ -6,7 +6,7 @@ init -990 python in mas_submod_utils:
             "This submod adds a slight adjustment to the idle sprites for those who are affectionate or above with Monika. "
             "Allowing her to occasionally look over at what you're doing."
         ),
-        version="1.0.0"
+        version="1.0.1"
     )
 
 init 999 python in eh_utils:
@@ -38,6 +38,25 @@ init 999 python in eh_utils:
 
         return formatted_return
 
+    def safe_check_output(command):
+        """
+        Wrapper for subprocess.check_output which logs errors and returns None if failed
+
+        IN:
+            command - The command to run (plus follow up arguments) in list format (same as subprocess.check_output)
+
+        OUT:
+            The results of the command if success, or None if failure
+        """
+        try:
+            return subprocess.check_output(command)
+        except Exception as e:
+            store.mas_utils.writelog("[ERROR]: Failed to check output for command struct: {0}. Error: {1}\n".format(
+                command, e
+            ))
+            #Return None to indicate failure
+            return None
+
     def getMousePosWin():
         """
         Returns an (x, y) co-ord tuple for the mouse position
@@ -65,7 +84,11 @@ init 999 python in eh_utils:
             tuple representing mouse position
         """
         if store.mas_windowreacts.can_do_windowreacts:
-            raw_pos = subprocess.check_output(["xdotool", "getmouselocation", "--shell"])
+            raw_pos = safe_check_output(["xdotool", "getmouselocation", "--shell"])
+
+            #Make sure we don't try to process bad coords
+            if raw_pos is None:
+                return DEF_MOUSE_POS_RETURN
 
             #Convert to dict for easy gets
             pos_data = proc_output_to_dict(raw_pos)
@@ -108,10 +131,14 @@ init 999 python in eh_utils:
         OUT:
             int - represents the window id of the MAS window
         """
+        raw_out = safe_check_output(["xdotool", "search", "--name", "^{0}$".format(renpy.config.window_title)])
+
+        #Make sure we don't attempt to .strip('\n') a NoneType
+        if raw_out is None:
+            return 0
+
         return store.mas_utils.tryparseint(
-            subprocess.check_output(
-                ["xdotool", "search", "--name", "^{0}$".format(renpy.config.window_title)]
-            ).strip('\n'),
+            raw_out.strip('\n'),
             0
         )
 
@@ -142,7 +169,12 @@ init 999 python in eh_utils:
             return None
 
         #Get the data and convert to a more useable
-        raw_geo = subprocess.check_output(["xdotool", "getwindowgeometry", "--shell", "{0}".format(win_id)])
+        raw_geo = safe_check_output(["xdotool", "getwindowgeometry", "--shell", "{0}".format(win_id)])
+
+        #If we couldn't get the geometry, then we just return None
+        if raw_geo is None:
+            return None
+
         geo_data = proc_output_to_dict(raw_geo)
 
         #Fetch left and top for use to calculate right and bottom
