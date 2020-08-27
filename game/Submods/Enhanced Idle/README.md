@@ -24,5 +24,5 @@ NOTE: For Linux, this REQUIRES `xdotool` to be installed (much like windowreacts
 
 This is compatible with the [Submod Updater Plugin](https://github.com/Booplicate/MAS-Submods-SubmodUpdaterPlugin/releases/latest)! Install that to update with ease
 
-Please leave and problems you might be having or suggestions as an issue on the issues page
-###### Thank you!
+### Please report any and all problems in the `issues` tab.
+###### Thank you
