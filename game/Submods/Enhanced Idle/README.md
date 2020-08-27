@@ -20,8 +20,9 @@ NOTE: This does **not** work for Mac as it requires OS specific things and I hav
 
 This is mainly a minor, but adorable change to the idle sprites to let Moni be a little more *aware* of things happening outside MAS
 
-NOTE:
-For Linux, this REQUIRES `xdotool` to be installed (much like windowreacts do)
+NOTE: For Linux, this REQUIRES `xdotool` to be installed (much like windowreacts do)
+
+This is compatible with the [Submod Updater Plugin](https://github.com/Booplicate/MAS-Submods-SubmodUpdaterPlugin/releases/latest)! Install that to update with ease
 
 Please leave and problems you might be having or suggestions as an issue on the issues page
 ###### Thank you!

@@ -1,16 +1,29 @@
 init -990 python in mas_submod_utils:
-    Submod(
+    ei_submod = Submod(
         author="multimokia",
         name="Enhanced Idle",
         description=(
             "This submod adds a slight adjustment to the idle sprites for those who are affectionate or above with Monika. "
             "Allowing her to occasionally look over at what you're doing."
         ),
-        version="1.0.1"
+        version="1.1.0"
     )
 
-init 999 python in eh_utils:
+init -989 python in ei_utils:
     import store
+
+    #Register the updater if needed
+    if store.mas_submod_utils.isSubmodInstalled("Submod Updater Plugin"):
+        store.sup_utils.SubmodUpdater(
+            submod=store.mas_submod_utils.ei_submod,
+            user_name="multimokia",
+            repository_name="MAS-Submod-Enhanced-Idle",
+            tag_formatter=lambda x: x[x.index('_') + 1:],
+            update_dir="",
+            attachment_id=None,
+        )
+
+init 999 python in ei_utils:
     import subprocess
 
     DEF_MOUSE_POS_RETURN = (0, 0)
@@ -284,21 +297,27 @@ init 999 python in eh_utils:
 
 #Shorthand for follow sprites as they're used in multiple idle anims
 image monika 1eua_follow = ConditionSwitch(
-    "eh_utils.isCursorRightOfMASWindow()","monika 1lua",
-    "eh_utils.isCursorLeftOfMASWindow()", "monika 1rsu",
+    "ei_utils.isCursorRightOfMASWindow()","monika 1lua",
+    "ei_utils.isCursorLeftOfMASWindow()", "monika 1rua",
     "True", "monika 1eua"
 )
 
 image monika 5esu_follow = ConditionSwitch(
-    "eh_utils.isCursorRightOfMASWindow()","monika 5luu",
-    "eh_utils.isCursorLeftOfMASWindow()", "monika 5ruu",
+    "ei_utils.isCursorRightOfMASWindow()","monika 5lsu",
+    "ei_utils.isCursorLeftOfMASWindow()", "monika 5rsu",
     "True", "monika 5esu"
 )
 
 image monika 5eubla_follow = ConditionSwitch(
-    "eh_utils.isCursorRightOfMASWindow()","monika 5lubsa",
-    "eh_utils.isCursorLeftOfMASWindow()", "monika 5rubfu",
+    "ei_utils.isCursorRightOfMASWindow()","monika 5lubla",
+    "ei_utils.isCursorLeftOfMASWindow()", "monika 5rublu",
     "True", "monika 5eubla"
+)
+
+image monika 5eubsa_follow = ConditionSwitch(
+    "ei_utils.isCursorRightOfMASWindow()","monika 5lubsa",
+    "ei_utils.isCursorLeftOfMASWindow()", "monika 5rubsu",
+    "True", "monika 5eubsa"
 )
 
 #Overrides for idle ATL parts
@@ -485,6 +504,9 @@ init 999:
                         choice:
                             "monika 1kua"
                             1.5
+                        choice:
+                            "monika 5eubsa_follow"
+                            20
 
                         "monika 1eua_follow"
 
