@@ -321,7 +321,7 @@ image monika 5eubsa_follow = ConditionSwitch(
 )
 
 #Overrides for idle ATL parts
-init 999:
+init 1:
     #AFFECTIONATE
     image monika ATL_affectionate:
         block:
