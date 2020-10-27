@@ -24,9 +24,24 @@ init -989 python in ei_utils:
         )
 
 init 999 python in ei_utils:
+    import datetime
     import subprocess
 
+    #Default position for the mouse if we can't get it
     DEF_MOUSE_POS_RETURN = (0, 0)
+
+    #Position of the mouse (friendly). To be used in ConditionSwitch
+    #NOTE: This is updated by ch30_loop
+    LAST_FRIENDLY_MOUSE_POS = "middle"
+
+    #Minimum time to wait before checking the window position again
+    MIN_WAIT_TIME = datetime.timedelta(seconds=1)
+
+    #Time we last checked the eye pos
+    LAST_CHECKED_DT = datetime.datetime.now()
+
+    #ret value for same mouse pos to be used
+    MP_SAME = "same"
 
     def proc_output_to_dict(raw_return):
         """
@@ -155,6 +170,22 @@ init 999 python in ei_utils:
             0
         )
 
+    def timecheck():
+        """
+        Shorthand timecheck function to see if we should check mouse pos again
+
+        OUT:
+            MP_SAME (string) if the mouse position should be the same, otherwise None, in which case checks should continue
+        """
+        global LAST_CHECKED_DT
+
+        _now = datetime.datetime.now()
+        if _now <= LAST_CHECKED_DT + MIN_WAIT_TIME:
+            return MP_SAME
+        else:
+            LAST_CHECKED_DT = _now
+            return None
+
     def getMASWindowPosWin():
         """
         Gets the window position for MAS as a tuple of (left, top, right, bottom)
@@ -208,6 +239,8 @@ init 999 python in ei_utils:
             True if cursor is within the mas window (within x/y), False otherwise
             Also returns True if we cannot get window position
         """
+        global LAST_FRIENDLY_MOUSE_POS
+
         pos_tuple = getMASWindowPos()
 
         if pos_tuple is None:
@@ -223,8 +256,8 @@ init 999 python in ei_utils:
         if not (top <= cur_y <= bottom):
             return False
 
+        LAST_FRIENDLY_MOUSE_POS = "middle"
         return True
-
 
     def isCursorLeftOfMASWindow():
         """
@@ -234,6 +267,8 @@ init 999 python in ei_utils:
             True if cursor is to the left of the window, False otherwise
             Also returns False if we cannot get window position
         """
+        global LAST_FRIENDLY_MOUSE_POS
+
         pos_tuple = getMASWindowPos()
 
         if pos_tuple is None:
@@ -244,6 +279,7 @@ init 999 python in ei_utils:
         cur_x, cur_y = getMousePos()
 
         if cur_x < left:
+            LAST_FRIENDLY_MOUSE_POS = "left"
             return True
         return False
 
@@ -255,6 +291,8 @@ init 999 python in ei_utils:
             True if cursor is to the right of the window, False otherwise
             Also returns False if we cannot get window position
         """
+        global LAST_FRIENDLY_MOUSE_POS
+
         pos_tuple = getMASWindowPos()
 
         if pos_tuple is None:
@@ -265,8 +303,34 @@ init 999 python in ei_utils:
         cur_x, cur_y = getMousePos()
 
         if cur_x > right:
+            LAST_FRIENDLY_MOUSE_POS = "right"
             return True
         return False
+
+
+    def timechecked_CiMW():
+        """
+        Timechecked version of isCursorInMASWindow. Ensures MIN_WAIT_TIME has passed before checking mouse pos again
+        """
+        if timecheck() == MP_SAME:
+            return LAST_FRIENDLY_MOUSE_POS == "middle"
+        return isCursorInMASWindow()
+
+    def timechecked_CLoMW():
+        """
+        Timechecked version of isCursorLeftOfMASWindow. Ensures MIN_WAIT_TIME has passed before checking mouse pos again
+        """
+        if timecheck() == MP_SAME:
+            return LAST_FRIENDLY_MOUSE_POS == "left"
+        return isCursorLeftOfMASWindow()
+
+    def timechecked_CRoMW():
+        """
+        Timechecked version of isCursorRightOfMASWindow. Ensures MIN_WAIT_TIME has passed before checking mouse pos again
+        """
+        if timecheck() == MP_SAME:
+            return LAST_FRIENDLY_MOUSE_POS == "right"
+        return isCursorRightOfMASWindow()
 
     def ret_false():
         """
@@ -297,31 +361,31 @@ init 999 python in ei_utils:
 
 #Shorthand for follow sprites as they're used in multiple idle anims
 image monika 1eua_follow = ConditionSwitch(
-    "ei_utils.isCursorRightOfMASWindow()","monika 1lua",
-    "ei_utils.isCursorLeftOfMASWindow()", "monika 1rua",
+    "ei_utils.timechecked_CRoMW()","monika 1lua",
+    "ei_utils.timechecked_CLoMW()", "monika 1rua",
     "True", "monika 1eua"
 )
 
 image monika 5esu_follow = ConditionSwitch(
-    "ei_utils.isCursorRightOfMASWindow()","monika 5lsu",
-    "ei_utils.isCursorLeftOfMASWindow()", "monika 5rsu",
+    "ei_utils.timechecked_CRoMW()","monika 5lsu",
+    "ei_utils.timechecked_CLoMW()", "monika 5rsu",
     "True", "monika 5esu"
 )
 
 image monika 5eubla_follow = ConditionSwitch(
-    "ei_utils.isCursorRightOfMASWindow()","monika 5lubla",
-    "ei_utils.isCursorLeftOfMASWindow()", "monika 5rublu",
+    "ei_utils.timechecked_CRoMW()","monika 5lubla",
+    "ei_utils.timechecked_CLoMW()", "monika 5rublu",
     "True", "monika 5eubla"
 )
 
 image monika 5eubsa_follow = ConditionSwitch(
-    "ei_utils.isCursorRightOfMASWindow()","monika 5lubsa",
-    "ei_utils.isCursorLeftOfMASWindow()", "monika 5rubsu",
+    "ei_utils.timechecked_CRoMW()","monika 5lubsa",
+    "ei_utils.timechecked_CLoMW()", "monika 5rubsu",
     "True", "monika 5eubsa"
 )
 
 #Overrides for idle ATL parts
-init 1:
+init 501:
     #AFFECTIONATE
     image monika ATL_affectionate:
         block:
